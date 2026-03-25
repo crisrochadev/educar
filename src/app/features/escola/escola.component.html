@@ -1,0 +1,38 @@
+<div class="flex justify-content-between align-items-center mb-3">
+  <h2 class="page-title mb-0">Escola</h2>
+  <button pButton label="Nova Escola" icon="pi pi-plus" (click)="displayDialog = true"></button>
+</div>
+
+<p-table [value]="escolas" [paginator]="true" [rows]="5" styleClass="section-card">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Nome</th>
+      <th>Diretor</th>
+      <th>Status</th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-escola>
+    <tr>
+      <td>{{ escola.nome }}</td>
+      <td>{{ escola.diretor }}</td>
+      <td><p-tag [value]="escola.status" severity="success"></p-tag></td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-dialog header="Nova Escola" [(visible)]="displayDialog" [modal]="true" [style]="{ width: '32rem' }">
+  <form [formGroup]="form" class="grid">
+    <div class="col-12">
+      <label>Nome</label>
+      <input pInputText formControlName="nome" class="w-full" />
+    </div>
+    <div class="col-12">
+      <label>Diretor</label>
+      <input pInputText formControlName="diretor" class="w-full" />
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" text (click)="displayDialog = false"></button>
+    <button pButton label="Salvar" (click)="save()"></button>
+  </ng-template>
+</p-dialog>
