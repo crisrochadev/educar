@@ -1,0 +1,123 @@
+<h2 class="page-title">Estoque</h2>
+
+<div class="grid">
+  <div class="col-12 lg:col-5">
+    <label>Selecionar estoque</label>
+    <p-dropdown
+      class="w-full"
+      [options]="estoqueOptions"
+      optionLabel="nome"
+      [ngModel]="selectedEstoque"
+      (onChange)="onEstoqueChange($event.value)"
+      placeholder="Selecione um estoque"
+    >
+      <ng-template let-option pTemplate="item">
+        <div class="flex justify-content-between align-items-center w-full">
+          <div>{{ option.nome }}</div>
+          <div class="flex gap-2">
+            <p-badge *ngIf="option.central" value="Central"></p-badge>
+            <i *ngIf="option.transferenciaHabilitada" class="pi pi-send text-green-500"></i>
+          </div>
+        </div>
+      </ng-template>
+    </p-dropdown>
+  </div>
+</div>
+
+<div class="grid mt-2">
+  <div class="col-12 md:col-6 xl:col-3" *ngFor="let kpi of kpis">
+    <p-card styleClass="section-card kpi-card">
+      <div class="flex justify-content-between align-items-center">
+        <div>
+          <small>{{ kpi.label }}</small>
+          <h3>{{ kpi.value }}</h3>
+        </div>
+        <i [class]="kpi.icon + ' text-blue-500 text-xl'"></i>
+      </div>
+    </p-card>
+  </div>
+</div>
+
+<p-tabView>
+  <p-tabPanel header="Estoque / Movimentações">
+    <p-table [value]="produtos" [paginator]="true" [rows]="8" [loading]="loading" styleClass="section-card">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Produto</th><th>Quantidade atual</th><th>Unidade</th><th>Estoque mínimo</th><th>Status</th><th>Ações</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-p>
+        <tr>
+          <td>{{ p.produto }}</td><td>{{ p.quantidadeAtual }}</td><td>{{ p.unidade }}</td><td>{{ p.estoqueMinimo }}</td>
+          <td><p-tag [value]="p.status" [severity]="statusSeverity(p.status)"></p-tag></td>
+          <td><button pButton icon="pi pi-eye" text></button></td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <h3>Movimentações recentes</h3>
+    <p-table [value]="movimentacoesRecentes" [rows]="5" styleClass="section-card">
+      <ng-template pTemplate="header"><tr><th>Tipo</th><th>Produto</th><th>Quantidade</th><th>Data</th><th>Responsável</th></tr></ng-template>
+      <ng-template pTemplate="body" let-m><tr><td>{{ m.tipo }}</td><td>{{ m.produto }}</td><td>{{ m.quantidade }}</td><td>{{ m.data }}</td><td>{{ m.responsavel }}</td></tr></ng-template>
+    </p-table>
+  </p-tabPanel>
+
+  <p-tabPanel header="Inventário">
+    <p-table [value]="produtos" [rows]="8" styleClass="section-card">
+      <ng-template pTemplate="header"><tr><th>Produto</th><th>Quantidade atual</th><th>Nova quantidade</th></tr></ng-template>
+      <ng-template pTemplate="body" let-p><tr><td>{{ p.produto }}</td><td>{{ p.quantidadeAtual }}</td><td><p-inputNumber [ngModel]="p.quantidadeAtual"></p-inputNumber></td></tr></ng-template>
+    </p-table>
+    <button pButton label="Ajustar estoque" class="mt-3" icon="pi pi-check" (click)="ajustarEstoque()"></button>
+  </p-tabPanel>
+
+  <p-tabPanel header="Entradas">
+    <form [formGroup]="entradaForm" class="grid">
+      <div class="col-12 md:col-3"><label>Fornecedor</label><input pInputText formControlName="fornecedor" class="w-full" /></div>
+      <div class="col-12 md:col-2"><label>Nº NF</label><input pInputText formControlName="nf" class="w-full" /></div>
+      <div class="col-12 md:col-3"><label>Data entrada</label><p-datePicker formControlName="dataEntrada" styleClass="w-full"></p-datePicker></div>
+      <div class="col-12 md:col-2"><label>Valor total</label><p-inputNumber mode="currency" currency="BRL" locale="pt-BR" formControlName="valorTotal"></p-inputNumber></div>
+    </form>
+    <p-table [value]="entradasItens" [rows]="5" styleClass="section-card mt-3">
+      <ng-template pTemplate="header"><tr><th>Produto</th><th>Quantidade</th><th>Unidade</th><th>Validade</th><th>Valor unitário</th><th>Total</th></tr></ng-template>
+      <ng-template pTemplate="body" let-item><tr><td>{{ item.produto }}</td><td>{{ item.quantidade }}</td><td>{{ item.unidade }}</td><td>{{ item.validade }}</td><td>{{ item.valorUnitario | currency:'BRL' }}</td><td>{{ item.total | currency:'BRL' }}</td></tr></ng-template>
+    </p-table>
+    <button pButton label="Adicionar item" icon="pi pi-plus" class="mt-3" (click)="addEntradaItem()"></button>
+  </p-tabPanel>
+
+  <p-tabPanel header="Saídas">
+    <form [formGroup]="saidaForm" class="grid">
+      <div class="col-12 md:col-2"><label>Data</label><p-datePicker formControlName="data" styleClass="w-full"></p-datePicker></div>
+      <div class="col-12 md:col-3"><label>Produto</label><input pInputText formControlName="produto" class="w-full" /></div>
+      <div class="col-12 md:col-2"><label>Quantidade</label><p-inputNumber formControlName="quantidade"></p-inputNumber></div>
+      <div class="col-12 md:col-3"><label>Motivo</label><p-dropdown [options]="motivosSaida" optionLabel="label" optionValue="value" formControlName="motivo" styleClass="w-full"></p-dropdown></div>
+      <div class="col-12 md:col-2"><label>Responsável</label><input pInputText formControlName="responsavel" class="w-full" /></div>
+      <div class="col-12 md:col-4"><label>Cardápio (opcional)</label><input pInputText formControlName="cardapio" class="w-full" /></div>
+      <div class="col-12 md:col-3"><label>Lote (FEFO)</label><p-dropdown [options]="lotes" optionLabel="lote" optionValue="lote" formControlName="lote" styleClass="w-full"></p-dropdown></div>
+    </form>
+    <button pButton label="Registrar saída" icon="pi pi-arrow-right" class="mt-3" (click)="registrarSaida()"></button>
+  </p-tabPanel>
+
+  <p-tabPanel header="Lotes / Validade">
+    <p-table [value]="lotes" [rows]="8" styleClass="section-card">
+      <ng-template pTemplate="header"><tr><th>Produto</th><th>Lote</th><th>Validade</th><th>Quantidade</th><th>Dias restantes</th></tr></ng-template>
+      <ng-template pTemplate="body" let-l>
+        <tr [class.warning-row]="l.diasRestantes <= 15" [class.critical-row]="l.diasRestantes <= 7">
+          <td>{{ l.produto }}</td><td>{{ l.lote }}</td><td>{{ l.validade }}</td><td>{{ l.quantidade }}</td><td>{{ l.diasRestantes }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-tabPanel>
+
+  <p-tabPanel header="Fornecimentos">
+    <p-table [value]="fornecimentos" [rows]="8" [paginator]="true" styleClass="section-card">
+      <ng-template pTemplate="header"><tr><th>Fornecedor</th><th>Status</th><th>Data atualização</th></tr></ng-template>
+      <ng-template pTemplate="body" let-f>
+        <tr>
+          <td>{{ f.fornecedor }}</td>
+          <td><p-tag [value]="f.status" [severity]="fornecimentoSeverity(f.status)"></p-tag></td>
+          <td>{{ f.dataAtualizacao }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-tabPanel>
+</p-tabView>

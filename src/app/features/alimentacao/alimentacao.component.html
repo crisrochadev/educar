@@ -1,0 +1,24 @@
+<div class="flex justify-content-between align-items-center mb-3">
+  <h2 class="page-title mb-0">Alimentação</h2>
+  <button pButton label="Registrar refeição" icon="pi pi-plus" (click)="registrar()"></button>
+</div>
+
+<form [formGroup]="form" class="grid mb-3">
+  <div class="col-12 md:col-4">
+    <label>Data</label>
+    <p-datePicker formControlName="data" styleClass="w-full"></p-datePicker>
+  </div>
+</form>
+
+<p-table [value]="refeicoes" [paginator]="true" [rows]="5" styleClass="section-card">
+  <ng-template pTemplate="header">
+    <tr><th>Refeição</th><th>Escola</th><th>Alunos atendidos</th></tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td>{{ item.refeicao }}</td>
+      <td>{{ item.escola }}</td>
+      <td>{{ item.alunos }}</td>
+    </tr>
+  </ng-template>
+</p-table>
